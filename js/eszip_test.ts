@@ -10,33 +10,33 @@ Deno.test("roundtrip build + parse", async () => {
     "https://example.com/mod.ts",
     "https://example.com/a.ts",
     "external:main.js",
-  ], async (specifier: string) => {
+  ], (specifier: string) => {
     if (specifier === "external:main.js") {
-      return {
+      return Promise.resolve({
         kind: "external",
         specifier,
-      };
+      });
     }
 
     if (specifier === "https://example.com/a.ts") {
-      return {
+      return Promise.resolve({
         kind: "module",
         specifier,
         headers: {
           "content-type": "text/typescript",
         },
         content: "export const a = 1;",
-      };
+      });
     }
 
-    return {
+    return Promise.resolve({
       kind: "module",
       specifier: "https://example.com/mod.ts",
       headers: {
         "content-type": "application/typescript",
       },
       content: `import "https://example.com/a.ts";`,
-    };
+    });
   });
 
   assert(eszip instanceof Uint8Array);
@@ -73,7 +73,7 @@ Deno.test("loader errors", async () => {
     () =>
       build(
         ["https://deno.land/std@0.123.0/fs/mod.ts"],
-        (specifier: string) => Promise.reject(new Error("oops")),
+        (_specifier: string) => Promise.reject(new Error("oops")),
       ),
     undefined,
     "oops",

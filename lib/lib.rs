@@ -287,6 +287,7 @@ pub async fn build_eszip(
       deno_graph::source::LoadResponse::Module {
         specifier, content, ..
       } => {
+        let content = String::from_utf8(content.to_vec()).unwrap();
         let import_map =
           import_map::parse_from_json(&specifier, &content).unwrap();
         (Some(import_map.import_map), Some((specifier, content)))
@@ -325,7 +326,7 @@ pub async fn build_eszip(
     eszip.add_import_map(
       ModuleKind::Json,
       import_map_specifier.to_string(),
-      Arc::from(import_map_content),
+      Arc::from(import_map_content.into_bytes()),
     )
   }
   Ok(Uint8Array::from(eszip.into_bytes().as_slice()))
